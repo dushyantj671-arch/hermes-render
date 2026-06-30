@@ -6,31 +6,29 @@ echo "HOST: '$HOST'"
 echo "PORT: '$PORT'"
 echo "============================"
 
-# Provide defaults if environment variables are not set
-# This ensures we always have valid values even if envsubst fails
-: "${HOST:=0.0.0.0}"
-: "${PORT:=8080}"
+# Set default values if variables are not set or empty
+HOST_VALUE=${HOST:-0.0.0.0}
+PORT_VALUE=${PORT:-8080}
 
-echo "Using HOST: $HOST"
-echo "Using PORT: $PORT"
+echo "Using HOST: $HOST_VALUE"
+echo "Using PORT: $PORT_VALUE"
 
 # Read the template and replace placeholders with actual values
-# Using sed for reliable substitution
+# Using sed with delimiter '|' to avoid conflicts with slashes in values
 echo "Creating config from template..."
-sed -e "s|\${HOST:-0\.0\.0\.0}|$HOST|g" -e "s|\${PORT:-8080}|$PORT|g" /app/config.template.yaml > /app/config.yaml
+sed -e "s|\${HOST:-0\.0\.0\.0}|$HOST_VALUE|g" -e "s|\${PORT:-8080}|$PORT_VALUE|g" /app/config.template.yaml > /app/config.yaml
 
-# Alternative approach: if the above doesn't work due to escaping, try this:
-# cat /app/config.template.yaml | sed "s/\${HOST:-0.0.0.0}/$HOST/g; s/\${PORT:-8080}/$PORT/g" > /app/config.yaml
+# Check if substitution succeeded (no template variables left)
+if grep -q "\${" /app/config.yaml; then
+    echo "ERROR: Template variables not substituted in config!"
+    echo "Contents of config.yaml:"
+    cat /app/config.yaml
+    exit 1
+fi
 
 echo "Substitution complete."
 echo "Generated config:"
 cat /app/config.yaml
-
-# Verify that the substitution actually worked (no template variables left)
-if grep -q "\${" /app/config.yaml; then
-    echo "ERROR: Template variables not substituted in config!"
-    exit 1
-fi
 
 # Use the appuser's home directory for Hermes config
 HERMES_CONFIG_DIR="/home/appuser/.hermes"
