@@ -1,0 +1,13 @@
+# Example – keep your existing structure, only edit the highlighted lines
+model:
+  default: nemotron-3-ultra-550b-a55b
+  provider: nim
+  base_url: ''  # fill in if needed; can be left empty if set via env
+
+platforms:
+  webhook:
+    enabled: true
+    extra:
+      host: "${HOST:-0.0.0.0}"
+      port: "${PORT:-8080}"
+    # keep any existing keys like: routes, etc.

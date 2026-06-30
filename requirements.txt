@@ -1,0 +1,3 @@
+hermes-agent
+python-telegram-bot
+aiohttp
