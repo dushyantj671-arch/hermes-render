@@ -8,6 +8,6 @@ platforms:
   webhook:
     enabled: true
     extra:
-      host: "$HOST"
-      port: "$PORT"
+      host: $HOST
+      port: $PORT
     # keep any existing keys like: routes, etc.

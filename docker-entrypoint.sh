@@ -6,25 +6,30 @@ echo "HOST: '$HOST'"
 echo "PORT: '$PORT'"
 echo "============================"
 
-# Set default values if variables are unset or empty
-: "${HOST:=0.0.0.0}"
-: "${PORT:=8080}"
+# Set default values
+DEFAULT_HOST="0.0.0.0"
+DEFAULT_PORT="8080"
 
-echo "Using HOST: $HOST"
-echo "Using PORT: $PORT"
+# Use the values from environment or defaults
+HOST_VALUE="${HOST:-$DEFAULT_HOST}"
+PORT_VALUE="${PORT:-$DEFAULT_PORT}"
+
+echo "Using HOST: $HOST_VALUE"
+echo "Using PORT: $PORT_VALUE"
 
 # Export for envsubst
-export HOST
-export PORT
+export HOST="$HOST_VALUE"
+export PORT="$PORT_VALUE"
 
 echo "Substituting environment variables..."
 envsubst < /app/config.template.yaml > /app/config.yaml
+
 echo "Substitution complete."
 echo "Generated config:"
 cat /app/config.yaml
 
-# Check if substitution worked (look for $HOST or $PORT in the output)
-if grep -q '\$HOST\|\$PORT' /app/config.yaml; then
+# Verify that substitution worked (no template variables left)
+if grep -q "\${" /app/config.yaml; then
     echo "ERROR: Template variables not substituted in config!"
     exit 1
 fi
