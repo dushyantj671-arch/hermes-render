@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-# Substitute environment variables in the template config
+echo "Substituting environment variables..."
 envsubst < /app/config.template.yaml > /app/config.yaml
+echo "Substitution complete."
 
-# Start Hermes gateway
-hermes gateway start --config /app/config.yaml
+echo "Starting Hermes gateway..."
+exec hermes gateway run --config /app/config.yaml

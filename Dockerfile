@@ -12,10 +12,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy entrypoint script and make executable
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Copy application source
 COPY . .
 
-# Create non-root user for security
+# Create non-root user for security and set ownership of app directory
 RUN useradd --create-home appuser && \
     chown -R appuser:appuser /app
 
