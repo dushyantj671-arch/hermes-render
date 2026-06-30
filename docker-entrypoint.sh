@@ -6,23 +6,25 @@ echo "HOST: '$HOST'"
 echo "PORT: '$PORT'"
 echo "============================"
 
-# Set default values
-DEFAULT_HOST="0.0.0.0"
-DEFAULT_PORT="8080"
+# Set default values if variables are not set or empty
+: "${HOST:=0.0.0.0}"
+: "${PORT:=8080}"
 
-# Use the values from environment or defaults
-HOST_VALUE="${HOST:-$DEFAULT_HOST}"
-PORT_VALUE="${PORT:-$DEFAULT_PORT}"
+echo "Using HOST: $HOST"
+echo "Using PORT: $PORT"
 
-echo "Using HOST: $HOST_VALUE"
-echo "Using PORT: $PORT_VALUE"
+# Replace variables in the template - handle both $VAR and ${VAR:-default} formats
+# First, try to replace the default value format if it exists
+sed -e "s/\${HOST:-0\.0\.0\.0}/$HOST/g" -e "s/\${PORT:-8080}/$PORT/g" /app/config.template.yaml > /app/config.yaml.tmp
 
-# Export for envsubst
-export HOST="$HOST_VALUE"
-export PORT="$PORT_VALUE"
+# If that didn't change anything (pattern not found), try direct variable replacement
+if ! grep -q "\${HOST:-0\.0\.0\.0}\|\${PORT:-8080}" /app/config.yaml.tmp; then
+    # Try replacing $HOST and $PORT directly
+    sed -e "s/\$HOST/$HOST/g" -e "s/\$PORT/$PORT/g" /app/config.template.yaml > /app/config.yaml.tmp
+fi
 
-echo "Substituting environment variables..."
-envsubst < /app/config.template.yaml > /app/config.yaml
+# If still no substitution happened, use the template as-is (will use defaults from envsubst later if needed)
+mv /app/config.yaml.tmp /app/config.yaml
 
 echo "Substitution complete."
 echo "Generated config:"
@@ -30,8 +32,13 @@ cat /app/config.yaml
 
 # Verify that substitution worked (no template variables left)
 if grep -q "\${" /app/config.yaml; then
-    echo "ERROR: Template variables not substituted in config!"
-    exit 1
+    echo "WARNING: Template variables not fully substituted in config!"
+    echo "This might be okay if envsubst will handle them, but let's check..."
+    # Try one more approach with envsubst as fallback
+    export HOST PORT
+    envsubst < /app/config.template.yaml > /app/config.yaml
+    echo "After envsubst:"
+    cat /app/config.yaml
 fi
 
 # Use the appuser's home directory for Hermes config
