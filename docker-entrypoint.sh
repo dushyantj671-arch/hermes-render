@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+echo "HOST: $HOST"
+echo "PORT: $PORT"
+
 echo "Substituting environment variables..."
 envsubst < /app/config.template.yaml > /app/config.yaml
 echo "Substitution complete."
@@ -19,4 +22,4 @@ cp /app/config.yaml "$HERMES_CONFIG_FILE"
 
 # Start Hermes gateway (it will pick up the config from the default location)
 echo "Starting Hermes gateway..."
-hermes gateway start
+hermes gateway run
