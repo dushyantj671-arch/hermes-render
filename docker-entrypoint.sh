@@ -7,11 +7,15 @@ echo "Substitution complete."
 echo "Generated config:"
 cat /app/config.yaml
 
-# Ensure the Hermes config directory exists
-mkdir -p /appuser/.hermes
-# Copy the generated config to the default location
-cp /app/config.yaml /appuser/.hermes/config.yaml
-echo "Copied config to /appuser/.hermes/config.yaml"
+# Use the appuser's home directory for Hermes config
+echo "HOME is: $HOME"
+HERMES_CONFIG_DIR="$HOME/.hermes"
+HERMES_CONFIG_FILE="$HERMES_CONFIG_DIR/config.yaml"
+
+echo "Hermes config directory: $HERMES_CONFIG_DIR"
+mkdir -p "$HERMES_CONFIG_DIR"
+echo "Copying config to $HERMES_CONFIG_FILE"
+cp /app/config.yaml "$HERMES_CONFIG_FILE"
 
 # Start Hermes gateway (it will pick up the config from the default location)
 echo "Starting Hermes gateway..."
